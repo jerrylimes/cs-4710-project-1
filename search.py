@@ -156,22 +156,25 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     # Pretty much UCS, but we rank nodes by g + h instead of just g
-    frontier = util.PriorityQueue()
+    frngNodes = util.PriorityQueue()
     visited = set()
     start = problem.getStartState()
-    frontier.push((start, [], 0), heuristic(start, problem))
-    while not frontier.isEmpty():
-        state, actions, cost = frontier.pop()
+    #push the start, actions and cost
+    frngNodes.push((start, [], 0), heuristic(start, problem))
+    while not frngNodes.isEmpty():
+        state, actions, cost = frngNodes.pop()
+        #if we're done/reached the goal, exit
         if problem.isGoalState(state):
             return actions
-        # Wait until we pop to mark visited so a cheaper path can still get through
-        if state not in visited:
+        #otherwise process node/branch
+        elif state not in visited:
             visited.add(state)
             for successor, action, step_cost in problem.getSuccessors(state):
-                new_actions = actions + [action]
-                new_cost = cost + step_cost
-                priority = new_cost + heuristic(successor, problem)
-                frontier.push((successor, new_actions, new_cost), priority)
+                newActions = actions + [action]
+                newCost = cost + step_cost
+                #This pt is exclusive to Astar, the priority is set as the additional cost + heuristic
+                priority = newCost + heuristic(successor, problem)
+                frngNodes.push((successor, newActions, newCost), priority)
     util.raiseNotDefined()
 
 

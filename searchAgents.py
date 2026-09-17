@@ -296,14 +296,18 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        visited = frozenset()
+        if self.startingPosition in self.corners:
+            visited = frozenset([self.startingPosition])
+        return (self.startingPosition, visited)
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #ignore the position (index 0) and return whether the 4 corners have been hit
+        return len(state[1]) ==4
 
     def getSuccessors(self, state: Any):
         """
@@ -326,6 +330,16 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            position, visited = state
+            x, y = position
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextPosition = (nextx, nexty)
+                nextVisited = visited
+                if nextPosition in self.corners:
+                    nextVisited = visited | frozenset([nextPosition])
+                successors.append(((nextPosition, nextVisited), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -361,7 +375,30 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    #state is (where pacman is, which corners we already touched)
+    position, visited = state
+    remaining = [corner for corner in corners if corner not in visited]
+    #already hit all 4 corners -> goal, heuristic must be 0
+    if not remaining:
+        return 0
+
+    #straight-line distance: sqrt(dx^2 + dy^2)
+    #ignores walls, so it's always <= the real maze distance
+    def euclidean(p1, p2):
+        return pow(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2), 0.5)
+
+    #shortest tour through whatever corners are still left.
+    #try going to each leftover corner next, then recurse on the rest,
+    #and keep the cheapest option. with only 4 corners this is cheap.
+    def tour_cost(pos, leftover):
+        if not leftover:
+            return 0
+        return min(
+            euclidean(pos, corner) + tour_cost(corner, leftover - {corner})
+            for corner in leftover
+        )
+
+    return tour_cost(position, set(remaining))
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
