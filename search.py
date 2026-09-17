@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem: SearchProblem):
     """
@@ -102,6 +104,7 @@ def depthFirstSearch(problem: SearchProblem):
                 stack.push((successor, new_actions))
     util.raiseNotDefined()
 
+
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
@@ -120,10 +123,26 @@ def breadthFirstSearch(problem: SearchProblem):
                 frontier.push((successor, actions + [action]))
     util.raiseNotDefined()
 
+
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    frontier = util.PriorityQueue()
+    visited = set()
+    start = problem.getStartState()
+    frontier.push((start, [], 0), 0)
+    while not frontier.isEmpty():
+        state, actions, cost = frontier.pop()
+        if problem.isGoalState(state):
+            return actions
+        if state not in visited:
+            visited.add(state)
+            for successor, action, step_cost in problem.getSuccessors(state):
+                new_actions = actions + [action]
+                new_cost = cost + step_cost
+                frontier.push((successor, new_actions, new_cost), new_cost)
     util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -131,6 +150,7 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
