@@ -296,7 +296,10 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        #need pos AND which corners we already hit, otherwise going back
+        #to the same square after hitting a corner looks like a repeat
         visited = frozenset()
+        #if we start on a corner count it as already visited
         if self.startingPosition in self.corners:
             visited = frozenset([self.startingPosition])
         return (self.startingPosition, visited)
@@ -334,9 +337,11 @@ class CornersProblem(search.SearchProblem):
             x, y = position
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+            #skip walls
             if not self.walls[nextx][nexty]:
                 nextPosition = (nextx, nexty)
                 nextVisited = visited
+                #if we land on a corner, add it so later states know we got it
                 if nextPosition in self.corners:
                     nextVisited = visited | frozenset([nextPosition])
                 successors.append(((nextPosition, nextVisited), action, 1))
@@ -499,16 +504,16 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
         return 0
 
     #create var to store furthest food
-    farthest = 0
+    furthestFood = 0
 
     #calc with mazeDist the distance from the cur position to the food in question and store
     #in farthest var if farther one found. The farthest food indicates the largest amount of steps 
     #needed to still finish all food
     for food in foods:
         d = mazeDistance(position, food, problem.startingGameState)
-        if d > farthest:
-            farthest = d
-    return farthest
+        if d > furthestFood:
+            furthestFood = d
+    return furthestFood
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -539,6 +544,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        #goal for this problem is ANY food, so bfs gives the closest one
         return search.breadthFirstSearch(problem)
         util.raiseNotDefined()
 
@@ -576,6 +582,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        #true if this square still has a pellet
         return self.food[x][y]
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:

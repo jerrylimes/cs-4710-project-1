@@ -91,11 +91,13 @@ def depthFirstSearch(problem: SearchProblem):
     "*** YOUR CODE HERE ***"
     visited = set()
     stack = util.Stack()
+    # (state). empty list at start bc we havent moved yet
     stack.push((problem.getStartState(), []))
     while not stack.isEmpty():
         state, actions = stack.pop()
         if problem.isGoalState(state):
             return actions
+        #graph search, ignore states we already popped
         if state not in visited:
             visited.add(state)
             successors = problem.getSuccessors(state)
@@ -115,9 +117,11 @@ def breadthFirstSearch(problem: SearchProblem):
     frontier.push((start, []))
     while not frontier.isEmpty():
         state, actions = frontier.pop()
+        #first time we hit the goal should be the shortest # of moves
         if problem.isGoalState(state):
             return actions
         for successor, action, step_cost in problem.getSuccessors(state):
+            #check visited here (when adding) so the queue doesnt get messed up
             if successor not in visited:
                 visited.add(successor)
                 frontier.push((successor, actions + [action]))
@@ -140,6 +144,7 @@ def uniformCostSearch(problem: SearchProblem):
             for successor, action, step_cost in problem.getSuccessors(state):
                 new_actions = actions + [action]
                 new_cost = cost + step_cost
+                #priority = running cost, so cheaper paths get popped first
                 frontier.push((successor, new_actions, new_cost), new_cost)
     util.raiseNotDefined()
 
