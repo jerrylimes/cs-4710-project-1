@@ -375,7 +375,7 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    #state is (where pacman is, which corners we already touched)
+    #state in this case (where pacman is, which corners we already touched)
     position, visited = state
     remaining = [corner for corner in corners if corner not in visited]
     #already hit all 4 corners -> goal, heuristic must be 0
@@ -490,9 +490,25 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    
+    position, foodGrid = state
+    foods = foodGrid.asList()
+    #if all food consumed were done
+    if not foods:
+        return 0
+
+    #create var to store furthest food
+    farthest = 0
+
+    #calc with mazeDist the distance from the cur position to the food in question and store
+    #in farthest var if farther one found. The farthest food indicates the largest amount of steps 
+    #needed to still finish all food
+    for food in foods:
+        d = mazeDistance(position, food, problem.startingGameState)
+        if d > farthest:
+            farthest = d
+    return farthest
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
